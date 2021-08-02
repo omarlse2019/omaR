@@ -1,0 +1,50 @@
+## AIDS Analysis
+
+disease_AIDS <- diseasesNumber_long %>% 
+  filter(Disease == "AIDS") %>% 
+  select(Disease, Count) %>% 
+  mutate(Year = c(2008:2018))
+
+disease_AIDS_ts <- ts(disease_AIDS$Count, start = "2008", frequency = 1)
+
+plot(disease_AIDS_ts, ylab = "Count")
+
+
+library(forecast)
+
+model_AIDs <- auto.arima(disease_AIDS_ts)
+
+summary(model_AIDs)
+forecast(model_AIDs, h = 4)
+plot(forecast(model_AIDs, h = 4))
+
+## HIV Analysis
+
+disease_HIV<- diseasesNumber_long %>% 
+  filter(Disease == "HIV") %>% 
+  select(Disease, Count) %>% 
+  mutate(Year = c(2008:2018))
+
+disease_HIV_ts <- ts(disease_HIV$Count, start = "2008", frequency = 1)
+
+plot(disease_HIV_ts, ylab = "Count")
+
+model_HIV<- auto.arima(disease_HIV_ts)
+
+summary(model_HIV)
+forecast(model_HIV, h = 4)
+plot(forecast(model_HIV, h = 4))
+
+
+## AIDS and HIV Plot
+
+hiv_n_aids <- bind_rows(disease_AIDS, disease_HIV) %>% 
+  mutate(Date = as.Date(paste0("31", "-", "12", "-", Year), format = "%d-%m-%Y"))
+
+
+library(ggplot2)
+
+ggplot(data = hiv_n_aids, aes(x = Date, y = Count, color = Disease)) +
+  geom_line(size = 1.5) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  facet_wrap(Disease ~ ., scales = "free_y", ncol = 1)
