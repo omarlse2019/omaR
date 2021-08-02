@@ -1,0 +1,58 @@
+gender_ageGroup <- read.csv("~/Downloads/Disease Sex and Age groups 2018 (1).csv")
+
+## Gender 
+gender_df <- gender_ageGroup %>% 
+  filter(Disease %in% c("HIV", "AIDS")) %>% 
+  select(-X_id) %>% 
+  gather(key = "group", value = "Count", -c("Disease", "Sex.")) %>% 
+  rename(Sex = `Sex.`) %>% 
+  mutate(Count = as.numeric(gsub(",", "", Count))) %>% 
+  group_by(Disease, Sex) %>% 
+  summarize(totalCount = sum(Count, na.rm = TRUE))
+
+
+ggplot(data = gender_df, aes(x = Sex, y = totalCount, fill = Sex)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  facet_wrap(Disease ~ ., nrow = 2, scales = "free_y") +
+  labs(x = "Gender",
+       y = "Count")
+
+
+## Age Group
+
+ageGroup_df <- gender_ageGroup %>% 
+  filter(Disease %in% c("HIV", "AIDS")) %>% 
+  select(-X_id) %>% 
+  gather(key = "ageGroup", value = "Count", -c("Disease", "Sex.")) %>% 
+  rename(Sex = `Sex.`) %>% 
+  mutate(Count = as.numeric(gsub(",", "", Count)),
+         ageGroup = case_when(ageGroup == "X.1" ~ "<1",
+                              ageGroup == "X01.04" ~ "1-4",
+                              ageGroup == "X05.09" ~  "5-9",
+                              ageGroup == "X10.14" ~ "10-14",
+                              ageGroup == "X15.19" ~ "15-19",
+                              ageGroup == "X20.24" ~ "20-24",
+                              ageGroup == "X25.29" ~ "25-29",
+                              ageGroup == "X30.34" ~ "30-34",
+                              ageGroup == "X35.39" ~ "35-39",
+                              ageGroup == "X40.44" ~ "40-44",
+                              ageGroup == "X45.49" ~ "45-49",
+                              ageGroup == "X50.54" ~ "50-54",
+                              ageGroup == "X55.59" ~ "55-59",
+                              ageGroup == "X60.64" ~ "60-64",
+                              ageGroup == "X65.69" ~ "65-69",
+                              ageGroup == "X70.74" ~ "70-74",
+                              ageGroup == "X75.79" ~ "75-79",
+                              ageGroup == "X80.84" ~ "80-84",
+                              ageGroup == "X85." ~ "85+",
+                              ageGroup == "Unk." ~ "Unknown")) %>% 
+  group_by(Disease, ageGroup) %>% 
+  summarise(totalCount = sum(Count, na.rm = TRUE))
+
+ ggplot(data = ageGroup_df, aes(x = ageGroup, y = totalCount)) +
+   geom_bar(stat = "identity") +
+   facet_wrap(Disease ~ ., scales = "free_x", nrow = 1)+
+   coord_flip() +
+   labs(x = "",
+        y = "Count")
+ 
