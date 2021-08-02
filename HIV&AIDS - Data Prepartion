@@ -1,0 +1,15 @@
+ratesbydisease2008_2018 <- read.csv("~/Downloads/ratesbydisease2008_2018.csv")
+
+library(dplyr)
+library(tidyr)
+
+diseasesNumber <- ratesbydisease2008_2018 %>% 
+  select(1,2,4,6,8,10,12,14,16,18,20,22) %>% 
+  .[-1, ]
+
+diseasesNumber_long <- diseasesNumber %>% 
+  gather(key = "Year", value = "Count", -Disease) %>% 
+  mutate(Count = gsub(",", "", Count),
+         Count = as.numeric(Count))
+
+View(diseasesNumber_long)
