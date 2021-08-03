@@ -1,0 +1,33 @@
+disease_gender <- read.csv("~/Downloads/ratesbydiseaseandsex2008_2018 (1).csv", header=FALSE, comment.char="#")
+
+disease_gender <- disease_gender %>% 
+  .[-c(1:2),]
+
+disease_gender_number <- disease_gender %>% 
+  select(1,2,3,5,7,9,11,13,15,17,19,21,23) %>% 
+  filter(V1 %in% c("HIV", "AIDS")) %>% 
+  gather(key = "Year", value = "Count", -c("V1", "V2")) %>% 
+  mutate(Count = as.numeric(gsub(",", "", Count)),
+         Year = case_when(Year == "V3" ~ "2008",
+                          Year == "V5" ~ "2009",
+                          Year == "V7" ~ "2010",
+                          Year == "V9" ~ "2011",
+                          Year == "V11" ~ "2012",
+                          Year == "V13"  ~ "2013",
+                          Year == "V15" ~ "2014",
+                          Year == "V17" ~ "2015",
+                          Year == "V19" ~ "2016",
+                          Year == "V21" ~ "2017",
+                          Year == "V23" ~ "2018")) %>% 
+  group_by(V1, V2, Year) %>% 
+  summarize(totalCount = sum(Count, na.rm = TRUE)) %>% 
+  rename(Disease = V1, Gender = V2) %>% 
+  mutate(Date = as.Date(paste0("31", "-","12", "-", Year), format = "%d-%m-%Y"))
+ 
+
+ggplot(data = disease_gender_number, aes(x = Date, y = totalCount, color = Gender)) +
+  geom_line(size = 1.5) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  facet_wrap(Disease ~ ., scales = "free_y", ncol = 1) +
+  labs(x = "Date",
+       y = "Count")
